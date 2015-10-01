@@ -17,7 +17,9 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -34,7 +36,7 @@ public class DummyDataGenerator implements DataGenerator {
     private int stringMin = 1;
     private static ThreadLocalRandom random = ThreadLocalRandom.current();
     private static Calendar calendar = Calendar.getInstance();
-
+    private static int MAX_TRY_FOR_UNIQUE_VALUE = 100;
     private boolean negativeNumber = false;
 
     public DummyDataGenerator() {
@@ -121,14 +123,15 @@ public class DummyDataGenerator implements DataGenerator {
       return generateStringData(1, max);
     }
 
+
     private Date randomDate() {
-      calendar.set(Calendar.YEAR, randRange(1900, 2015));
-      calendar.set(Calendar.MONTH, randRange(1, 12));
-      calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 30));
-      calendar.set(Calendar.HOUR, randRange(0, 24));
-      calendar.set(Calendar.MINUTE, randRange(0, 60));
-      calendar.set(Calendar.MILLISECOND, randRange(0, 100));
-      return calendar.getTime();
+        DummyDataGenerator.calendar.set(Calendar.YEAR, randRange(2000, 2016));
+        DummyDataGenerator.calendar.set(Calendar.MONTH, DummyDataGenerator.randRange(0, 12));
+        DummyDataGenerator.calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 31));
+        DummyDataGenerator.calendar.set(Calendar.HOUR, randRange(0, 24));
+        DummyDataGenerator.calendar.set(Calendar.MINUTE, randRange(0, 60));
+        DummyDataGenerator.calendar.set(Calendar.MILLISECOND, randRange(0, 100));
+        return DummyDataGenerator.calendar.getTime();
     }
 
     private String generateTimestamp() {
@@ -194,9 +197,21 @@ public class DummyDataGenerator implements DataGenerator {
     public String[] uniqueValuesOf(ColumnInfo info, int count) {
         HashSet<String> unique = new HashSet<String>(count);
         String value = null;
+
+        generate_values:
         for(int i = 0; i < count; i++) {
+            int tryToBeUnique = 0;
             do {
                 value = generateValue(info.getType(), info.getObjectInspector());
+                tryToBeUnique++;
+                if(tryToBeUnique > MAX_TRY_FOR_UNIQUE_VALUE) {
+                    LOG.info("Tried " + tryToBeUnique
+                        + " times to find unique values, but it can't have enough unique values,"
+                        + "please check your range of randomness.\n"
+                        + "Return with " + unique.size()
+                        + " out of " + count + " requested");
+                    break generate_values;
+                }
             } while (unique.contains(value));
             unique.add(value);
         }

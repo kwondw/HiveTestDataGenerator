@@ -46,6 +46,11 @@ public class RangeKey implements WritableComparable<RangeKey> {
         this.partitions.addPartition(partition);
     }
 
+
+    public void addPartition(Partition partition, int index) {
+        this.partitions.addPartition(partition, index);
+    }
+
     @Override
     public void write(DataOutput out) throws IOException {
         this.index.write(out);
@@ -90,6 +95,10 @@ public class RangeKey implements WritableComparable<RangeKey> {
 
     public Partitions getPartitions() {
         return partitions;
+    }
+
+    public Partition getPartition(int index) {
+      return partitions.getParittion(index);
     }
 
     public void setPartitions(Partitions partitions) {

@@ -23,8 +23,16 @@ public class Partitions {
         this.partitions.add(partition);
     }
 
+  public void addPartition(Partition partition, int index) {
+    this.partitions.add(index, partition);
+  }
+
     public ArrayList<Partition> getPartitions() {
         return partitions;
+    }
+
+    public Partition getParittion(int index) {
+      return partitions.get(index);
     }
 
     public void setPartitions(ArrayList<Partition> partitions) {

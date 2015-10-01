@@ -56,25 +56,30 @@ public class RangeGenerateMapper extends Mapper<LongWritable, Text, RangeKey, Ta
           List<ColumnInfo> partitionCols = table.getPartitionCols();
 
           int partitionCount = table.getPartitionCount();
-          int partitionKeyCount = partitionCols.size();
+          int partitionDepthCount = partitionCols.size();
           int outputCountPerPartition = table.getOutputCountPerPartition();
 
-          String[][] partitionKeys = new String[partitionKeyCount][partitionCount];
-          for(int i = 0; i < partitionKeyCount; i++ ) {
+          String[][] partitionKeys = new String[partitionDepthCount][];
+          for(int i = 0; i < partitionDepthCount; i++ ) {
             ColumnInfo info = partitionCols.get(i);
             partitionKeys[i] = dataGenerator.uniqueValuesOf(info, partitionCount);
           }
 
-          for (int index = 0; index < outputCountPerPartition; index++) {
-              for (int partitionIndex = 0; partitionIndex < partitionCount; partitionIndex++) {
-                  RangeKey rangeKey = new RangeKey(index);
-                  for (int depthIndex = 0; depthIndex < partitionKeyCount; depthIndex++) {
-                      ColumnInfo info = partitionCols.get(depthIndex);
-                      Partition part = makePartition(info, depthIndex, partitionKeys[depthIndex][partitionIndex]);
+          int lastPartitionIndex = partitionDepthCount-1;
+          int lastPartitionDepth = partitionKeys[lastPartitionIndex].length;
+          for (int fileIndex = 0; fileIndex < outputCountPerPartition; fileIndex++) {
+              for (int partitionIndex = 0; partitionIndex < lastPartitionDepth; partitionIndex++) {
+                  RangeKey rangeKey = new RangeKey(fileIndex);
+                // TODO : support multi depth level partition
+                // It only support last depth as one level partition for now
+                  int partitionDepthIndex = lastPartitionIndex;
+//                  for (int partitionDepthIndex = 0; partitionDepthIndex < partitionDepthCount; partitionDepthIndex++) {
+                      ColumnInfo info = partitionCols.get(partitionDepthIndex);
+                      Partition part = makePartition(info, partitionDepthIndex, partitionKeys[partitionDepthIndex][partitionIndex]);
                       rangeKey.addPartition(part);
-                  }
+ //                 }
                   TableInfo tableInfo = createTableInfo(table);
-                  tableInfo.setOutputFileIndex(new IntWritable(index));
+                  tableInfo.setOutputFileIndex(new IntWritable(fileIndex));
                   tableInfo.setPartitionPathsBy(rangeKey.getPartitions());
                   context.write(rangeKey, tableInfo);
               }
