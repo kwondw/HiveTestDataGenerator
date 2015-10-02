@@ -50,29 +50,28 @@ public class RangeGenerateMapper extends Mapper<LongWritable, Text, RangeKey, Ta
     }
 
   public ArrayList<Partition> clonePartitionList(ArrayList<Partition> list) {
-    List<Partition> clone = new ArrayList<Partition>(list.size());
+      ArrayList<Partition> clone = new ArrayList<Partition>(list.size());
     for(Partition item: list) {
       clone.add(item.clone());
     }
     return clone;
   }
 
-    private void generatePartitions(int currentPartitionIndex, int depthIndex, String[][] partitionKeys, ArrayList<Partition> partitionsKeyList, List<ColumnInfo> partitionCols, ArrayList<Partitions> partitionsList) {
-        if(depthIndex >= (partitionKeys.length - 1)) {
-            Partitions parts  = new Partitions();
-            for(Partition part: partitionsKeyList) {
-                parts.addPartition(part);
-            }
-            parts.addPartition(makePartition(partitionCols.get(depthIndex), depthIndex, partitionKeys[depthIndex][currentPartitionIndex]));
-            partitionsList.add(parts);
-            return;
+  private void generatePartitions(int depthIndex, String[][] rawPartitionKeys, ArrayList<Partition> partitionsKeyList, List<ColumnInfo> partitionCols, ArrayList<Partitions> partitionsList) {
+    if(depthIndex >= rawPartitionKeys.length) {
+        Partitions parts  = new Partitions();
+        for(Partition part: partitionsKeyList) {
+            parts.addPartition(part);
         }
-        for(int partitionIndex = 0; partitionIndex < partitionKeys[depthIndex].length; partitionIndex++) {
-            ArrayList<Partition> partitionsKeyListClone = clonePartitionList(partitionsKeyList);
-            partitionsKeyListClone.add(makePartition(partitionCols.get(depthIndex), depthIndex, partitionKeys[depthIndex][partitionIndex]));
-            generatePartitions(partitionIndex, depthIndex + 1, partitionKeys, partitionsKeyListClone, partitionCols, partitionsList);
-        }
+        partitionsList.add(parts);
+        return;
     }
+    for(int partitionIndex = 0; partitionIndex < rawPartitionKeys[depthIndex].length; partitionIndex++) {
+        ArrayList<Partition> partitionsKeyListClone = clonePartitionList(partitionsKeyList);
+        partitionsKeyListClone.add(makePartition(partitionCols.get(depthIndex), depthIndex, rawPartitionKeys[depthIndex][partitionIndex]));
+        generatePartitions(depthIndex + 1, rawPartitionKeys, partitionsKeyListClone, partitionCols, partitionsList);
+    }
+  }
 
   private void generateParitionRange(Table table, Context context) throws IOException, InterruptedException  {
     List<ColumnInfo> partitionCols = table.getPartitionCols();
@@ -88,7 +87,7 @@ public class RangeGenerateMapper extends Mapper<LongWritable, Text, RangeKey, Ta
     }
 
     ArrayList<Partitions> partitionsList = new ArrayList<Partitions>();
-    generatePartitions(0, 0, partitionKeys, null, partitionCols, partitionsList);
+    generatePartitions(0, partitionKeys, new ArrayList<Partition>(), partitionCols, partitionsList);
 
     for(Partitions partitions: partitionsList) {
       for (int fileIndex = 0; fileIndex < outputCountPerPartition; fileIndex++) {
@@ -147,40 +146,5 @@ public class RangeGenerateMapper extends Mapper<LongWritable, Text, RangeKey, Ta
             cleanup(context);
         }
     }
-
-
-  private void generateParitionRange2(Table table, Context context) throws IOException, InterruptedException  {
-    List<ColumnInfo> partitionCols = table.getPartitionCols();
-
-    int partitionCount = table.getPartitionCount();
-    int partitionDepthCount = partitionCols.size();
-    int outputCountPerPartition = table.getOutputCountPerPartition();
-
-    String[][] partitionKeys = new String[partitionDepthCount][];
-    for(int i = 0; i < partitionDepthCount; i++ ) {
-      ColumnInfo info = partitionCols.get(i);
-      partitionKeys[i] = dataGenerator.uniqueValuesOf(info, partitionCount);
-    }
-
-    int lastPartitionIndex = partitionDepthCount-1;
-    int lastPartitionDepth = partitionKeys[lastPartitionIndex].length;
-    for (int fileIndex = 0; fileIndex < outputCountPerPartition; fileIndex++) {
-      for (int partitionIndex = 0; partitionIndex < lastPartitionDepth; partitionIndex++) {
-        RangeKey rangeKey = new RangeKey(fileIndex);
-        // TODO : support multi depth level partition
-        // It only support last depth as one level partition for now
-        int partitionDepthIndex = lastPartitionIndex;
-//                  for (int partitionDepthIndex = 0; partitionDepthIndex < partitionDepthCount; partitionDepthIndex++) {
-        ColumnInfo info = partitionCols.get(partitionDepthIndex);
-        Partition part = makePartition(info, partitionDepthIndex, partitionKeys[partitionDepthIndex][partitionIndex]);
-        rangeKey.addPartition(part);
-        //                 }
-        TableInfo tableInfo = createTableInfo(table);
-        tableInfo.setOutputFileIndex(new IntWritable(fileIndex));
-        tableInfo.setPartitionPathsBy(rangeKey.getPartitions());
-        context.write(rangeKey, tableInfo);
-      }
-    }
-  }
 
 }

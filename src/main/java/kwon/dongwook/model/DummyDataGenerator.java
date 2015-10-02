@@ -120,10 +120,9 @@ public class DummyDataGenerator implements DataGenerator {
     }
 
     private Date randomDate() {
-//        DummyDataGenerator.calendar.set(Calendar.YEAR, randRange(2000, 2016));
-      DummyDataGenerator.calendar.set(Calendar.YEAR, 2000);
-        DummyDataGenerator.calendar.set(Calendar.MONTH, 0);
-        DummyDataGenerator.calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 3));
+        DummyDataGenerator.calendar.set(Calendar.YEAR, randRange(2000, 2016));
+        DummyDataGenerator.calendar.set(Calendar.MONTH, randRange(0, 12));
+        DummyDataGenerator.calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 31));
         DummyDataGenerator.calendar.set(Calendar.HOUR, randRange(0, 24));
         DummyDataGenerator.calendar.set(Calendar.MINUTE, randRange(0, 60));
         DummyDataGenerator.calendar.set(Calendar.MILLISECOND, randRange(0, 100));
@@ -174,7 +173,6 @@ public class DummyDataGenerator implements DataGenerator {
         }
         return new String(ch);
     }
-
 
     private String generateBooleanData() {
         return Boolean.toString(ThreadLocalRandom.current().nextBoolean());
