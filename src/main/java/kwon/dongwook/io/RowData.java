@@ -160,4 +160,5 @@ public class RowData implements WritableComparable<RowData> {
         this.fieldTerminator = fieldTerminator;
     }
 
+
 }

@@ -1,5 +1,6 @@
 package kwon.dongwook.model;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -175,6 +176,17 @@ public class QueryParser {
         return cols;
     }
 
+    private String parseSeparator(String original) {
+        String withoutQuote = Util.removeQuote(original);
+        String unescape = StringEscapeUtils.unescapeJava(withoutQuote);
+        try {
+            Integer code = Integer.parseInt(unescape, 16);
+            return Character.toString((char)code.byteValue());
+        } catch (NumberFormatException nfe) {
+            return unescape;
+        }
+    }
+
     private void setRowformat(Table.Builder tableBuilder, ASTNode rowFormatNode) {
         if(rowFormatNode != null) {
             ASTNode serdePropsNode = searcher.findFirst(rowFormatNode, HiveParser.TOK_SERDEPROPS);
@@ -184,7 +196,7 @@ public class QueryParser {
                 if(children.size() == 2) {
                     tableBuilder.setEscaper(Util.removeQuote(((ASTNode) children.get(1)).getText()));
                 } else if(children.size() < 3 && !children.isEmpty()) {
-                    tableBuilder.setFieldTerminator(Util.removeQuote(((ASTNode) children.get(0)).getText()));
+                    tableBuilder.setFieldTerminator(parseSeparator(((ASTNode) children.get(0)).getText()));
                 }
                 ASTNode rowFormatLinesNode = searcher.findFirst(serdePropsNode, HiveParser.TOK_TABLEROWFORMATLINES);
                 if(rowFormatLinesNode != null) {

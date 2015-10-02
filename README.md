@@ -95,7 +95,9 @@ with --partition-count 4 --file-count-per-partition 5 --row-count-per-file 10 pa
 Total (4 ^ 3) * 5 * 10 = 3200 rows for this table
 Total (4 ^ 3) * 5 = 320 files
 
-Unsupported feature yet
+Unsupported features yet
+
+Bucketized partitions
 
 Data type:
 Complex types are not supported yet.
