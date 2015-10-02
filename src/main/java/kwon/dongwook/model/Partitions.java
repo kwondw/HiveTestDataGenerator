@@ -1,6 +1,8 @@
 package kwon.dongwook.model;
 
 
+import org.apache.hadoop.io.IntWritable;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -23,8 +25,9 @@ public class Partitions {
         this.partitions.add(partition);
     }
 
-  public void addPartition(Partition partition, int index) {
-    this.partitions.add(index, partition);
+  public void addPartition(Partition partition, int depthIndex) {
+    partition.setDepth(depthIndex);
+    this.partitions.add(depthIndex, partition);
   }
 
     public ArrayList<Partition> getPartitions() {

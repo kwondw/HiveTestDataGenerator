@@ -15,21 +15,21 @@ public class RangeKey implements WritableComparable<RangeKey> {
 
     private Partitions partitions;
     private Text baseRange;
-    private IntWritable index;
+    private IntWritable outputFileIndex;
 
     public RangeKey() {
         this.partitions = new Partitions();
         this.baseRange = new Text("");
-        this.index = new IntWritable(1);
+        this.outputFileIndex = new IntWritable(1);
     }
 
     public boolean isPartitioned() {
         return !this.partitions.isEmpty();
     }
 
-    public RangeKey(int index) {
+    public RangeKey(int outputFileIndex) {
         this();
-        this.index = new IntWritable(index);
+        this.outputFileIndex = new IntWritable(outputFileIndex);
     }
 
     public RangeKey(Partitions partitions) {
@@ -47,13 +47,13 @@ public class RangeKey implements WritableComparable<RangeKey> {
     }
 
 
-    public void addPartition(Partition partition, int index) {
-        this.partitions.addPartition(partition, index);
+    public void addPartition(Partition partition, int partitionDepthIndex) {
+        this.partitions.addPartition(partition, partitionDepthIndex);
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
-        this.index.write(out);
+        this.outputFileIndex.write(out);
         if(isPartitioned()) {
           this.partitions.write(out);
         } else {
@@ -63,7 +63,7 @@ public class RangeKey implements WritableComparable<RangeKey> {
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        this.index.readFields(in);
+        this.outputFileIndex.readFields(in);
         if(isPartitioned()) {
           this.partitions.readFields(in);
         } else {
@@ -89,7 +89,7 @@ public class RangeKey implements WritableComparable<RangeKey> {
 
     @Override
     public int hashCode() {
-        return index.get() + (isPartitioned() ?
+        return outputFileIndex.get() + (isPartitioned() ?
                 partitions.hashCode(): baseRange.hashCode());
     }
 
@@ -113,7 +113,7 @@ public class RangeKey implements WritableComparable<RangeKey> {
         this.baseRange = text;
     }
 
-    public void setIndex(IntWritable index) { this.index = index; }
-    public IntWritable getIndex() { return this.index; }
+    public void setOutputFileIndex(IntWritable outputFileIndex) { this.outputFileIndex = outputFileIndex; }
+    public IntWritable getOutputFileIndex() { return this.outputFileIndex; }
 
 }

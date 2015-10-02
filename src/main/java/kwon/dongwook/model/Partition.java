@@ -34,6 +34,10 @@ public class Partition {
         this.depth = depth;
     }
 
+    public void setDepth(int depthIndex) {
+      this.depth = new IntWritable(depthIndex);
+    }
+
     public Text getKeyName() {
         return keyName;
     }
@@ -102,4 +106,18 @@ public class Partition {
             return false;
         }
     }
+
+  @Override
+  public Partition clone() {
+    Partition part = new Partition();
+    if(this.keyName != null)
+      part.keyName = this.keyName;
+    if(this.type != null)
+      part.type = this.type;
+    if(this.value != null)
+      part.value = this.value;
+    if(this.depth != null)
+      part.depth = this.depth;
+    return part;
+  }
 }

@@ -105,10 +105,6 @@ public class DummyDataGenerator implements DataGenerator {
         return new HiveIntervalYearMonth(randRange(1910, 2015), randRange(1, 12)).toString();
     }
 
-    private String generateTimestampe() {
-      return "";
-    }
-
     private String generateDecimal(DecimalTypeInfo type) {
         int precision = type.getPrecision();
         int scale = type.getScale();
@@ -123,11 +119,11 @@ public class DummyDataGenerator implements DataGenerator {
       return generateStringData(1, max);
     }
 
-
     private Date randomDate() {
-        DummyDataGenerator.calendar.set(Calendar.YEAR, randRange(2000, 2016));
-        DummyDataGenerator.calendar.set(Calendar.MONTH, DummyDataGenerator.randRange(0, 12));
-        DummyDataGenerator.calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 31));
+//        DummyDataGenerator.calendar.set(Calendar.YEAR, randRange(2000, 2016));
+      DummyDataGenerator.calendar.set(Calendar.YEAR, 2000);
+        DummyDataGenerator.calendar.set(Calendar.MONTH, 0);
+        DummyDataGenerator.calendar.set(Calendar.DAY_OF_MONTH, randRange(1, 3));
         DummyDataGenerator.calendar.set(Calendar.HOUR, randRange(0, 24));
         DummyDataGenerator.calendar.set(Calendar.MINUTE, randRange(0, 60));
         DummyDataGenerator.calendar.set(Calendar.MILLISECOND, randRange(0, 100));
@@ -158,25 +154,25 @@ public class DummyDataGenerator implements DataGenerator {
     }
 
     private String generateShort() {
-      int number = negativeNumber ? random.nextInt(Short.MIN_VALUE, Short.MAX_VALUE): random.nextInt(0, Short.MAX_VALUE);
-      return Short.toString((short)number);
+        int number = negativeNumber ? random.nextInt(Short.MIN_VALUE, Short.MAX_VALUE): random.nextInt(0, Short.MAX_VALUE);
+        return Short.toString((short)number);
     }
 
     private String generateByte() {
-      byte[] bs = new byte[1];
-      random.nextBytes(bs);
-      return Byte.toString(bs[0]);
+        byte[] bs = new byte[1];
+        random.nextBytes(bs);
+        return Byte.toString(bs[0]);
     }
 
     private String generateByteArray() {
-      int length = randRange(3, 10);
-      byte[] ba = new byte[length];
-      random.nextBytes(ba);
-      char[] ch = new char[length];
-      for (int i = 0; i < ba.length; i++) {
-        ch[i] = (char)ba[i];
-      }
-      return new String(ch);
+        int length = randRange(3, 10);
+        byte[] ba = new byte[length];
+        random.nextBytes(ba);
+        char[] ch = new char[length];
+        for (int i = 0; i < ba.length; i++) {
+          ch[i] = (char)ba[i];
+        }
+        return new String(ch);
     }
 
 
