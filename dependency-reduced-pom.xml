@@ -129,6 +129,7 @@
     <junit.version>4.12</junit.version>
     <maven-compiler.version>3.3</maven-compiler.version>
     <log4j-extras.version>1.2.17</log4j-extras.version>
+    <commons-lang.version>2.6</commons-lang.version>
     <commons-cli.version>1.2</commons-cli.version>
     <aws-java-sdk.version>1.10.19</aws-java-sdk.version>
     <commons-logging.version>1.2</commons-logging.version>
